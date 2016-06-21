@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * @file
+ * Install file to create the mapping table.
+ */
+
+function fm_rest_schema() {
+  $schema['fm_rest_category_mapping'] = array(
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'entity_type' => array(
+        'description' => t('The entity type'),
+        'type' => 'varchar',
+        'length' => 40,
+        'not null' => TRUE
+      ),
+      'remote_id' => array(
+        'description' => t('The remote entity ID'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'native_id' => array(
+        'description' => t('The native entity ID'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

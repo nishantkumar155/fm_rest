@@ -1,0 +1,14 @@
+{
+  "name": "drupal/fm_rest",
+  "type": "drupal-module",
+  "description": " Media plugin for REST Resources.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/fm_rest",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "http://drupal.org/project/issues/fm_rest",
+    "source": "http://cgit.drupalcode.org/fm_rest"
+  },
+  "require": { }
+}

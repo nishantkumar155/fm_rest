@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ * Contains fm_rest.module..
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\taxonomy\Entity\Term;
+
+/**
+ * Implements hook_help().
+ */
+function fm_rest_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the fm_rest module.
+    case 'help.page.fm_rest':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('FarmJournal Media plugin for REST Resources.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function fm_rest_cron() {
+
+  $db_conn = \Drupal::database();
+  $response = \Drupal::httpClient()
+    ->get('http://dev-ccms.pantheonsite.io/api/fm/greenbook_section?_format=json', [
+      'auth' => ['admin', 'ccmsadmin2016'],
+    ]);
+
+  $json_string = (string) $response->getBody();
+
+  $data = json_decode($json_string);
+
+  foreach ($data as $datum) {
+    $data = $db_conn->select('fm_rest_category_mapping', 'fm')
+      ->fields('fm', array('id'))
+      ->condition('fm.remote_id', $datum->tid, "=")
+      ->execute()
+      ->fetchObject();
+    if (!empty($data)) {
+      continue;
+    }
+
+    if ($datum->depth == 0) {
+      $term = Term::create(
+        array(
+          'name' => $datum->name,
+          'vid' => 'greenbook_section',
+        )
+      );
+      $term->save();
+    }
+    else {
+      $data_parent = $db_conn->select('fm_rest_category_mapping', 'fm')
+        ->fields('fm', array('native_id'))
+        ->condition('fm.remote_id', $datum->parent[0], "=")
+        ->execute()
+        ->fetchObject();
+
+      $term = Term::create(
+        array(
+          'name' => $datum->name,
+          'vid' => 'greenbook_section',
+          'parent' => array($data_parent->native_id)
+        )
+      );
+      $term->save();
+    }
+    $values = [
+      'entity_type' => 'taxonomy',
+      'remote_id' => $datum->tid,
+      'native_id' => $term->id()
+    ];
+
+    $query_insert = \Drupal::database()
+      ->insert('fm_rest_category_mapping')
+      ->fields($values);
+    $query_insert->execute();
+  }
+}

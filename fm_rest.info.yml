@@ -1,0 +1,8 @@
+name: FarmJournal Media REST
+type: module
+description: FarmJournal Media plugin for REST Resources.
+core: 8.x
+package: FarmJournal Media
+dependencies:
+  - rest
+  - restui
